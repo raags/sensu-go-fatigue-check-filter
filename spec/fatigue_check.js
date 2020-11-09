@@ -646,7 +646,7 @@ describe("fatigue_check", function() {
       var event = {
         "entity": {
           "namespace": "default",
-	  "annotations": {
+	        "annotations": {
             "fatigue_check/interval": 0
           }
         },
@@ -664,7 +664,7 @@ describe("fatigue_check", function() {
       var event = {
         "entity": {
           "namespace": "default",
-	  "annotations": {
+	        "annotations": {
             "fatigue_check/keepalive_interval": 0
           }
         },
@@ -677,6 +677,36 @@ describe("fatigue_check", function() {
         "is_resolution": false
       }
       expect(fatigue_check(event, 3, 60, 1, 60)).toBe(false);
+  });
+
+  it("returns false when the occurrences_window is larger than history", function() {
+      var now_s = Math.floor(Date.now() / 1000)
+      var history = [{
+          "status": 2,
+          "executed": now_s - (21 * 60 * 60)
+        },
+        {
+          "status": 2,
+          "executed": now_s - (23 * 60 * 60)
+        }]
+
+
+      var event = {
+        "entity": {
+          "namespace": "default",
+	        "annotations": {
+            "fatigue_check/occurrences_window": 86400
+          }
+        },
+        "check": {
+          "interval": 1,
+          "occurrences": 2,
+          "occurrences_watermark": 2,
+          "history": history
+        },
+        "is_resolution": false
+      }
+      expect(fatigue_check(event, 2, 60)).toBe(true);
   });
 
 });
